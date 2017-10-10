@@ -11,7 +11,9 @@ def link_crawler(seed_url, link_regex):
     while crawl_queue:
         url = crawl_queue.pop()
         html = download(url)
-        for link in get_links(html):
+        links = get_links(html)
+        # print("links:%s" % links)
+        for link in links:
             # check if link matches expected regex
             if re.match(link_regex, link):
                 # form absolute link
@@ -32,4 +34,4 @@ def get_links(html):
 
 
 if __name__ == '__main__':
-    link_crawler('http://example.webscraping.com', '/(index|view)')
+    link_crawler('http://example.webscraping.com', '/(.*?)(index|view)')

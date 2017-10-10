@@ -1,3 +1,8 @@
+# README
+the example web: http://example.webscraping.com has changed, so the code need some changes to fix the bugs.
+
+# primary README
+
 This repository contains source code of examples from the book *Web Scraping with Python*, published by Packt Publishing. 
 Examples have been tested with Python 2.7 and depend on: 
 
