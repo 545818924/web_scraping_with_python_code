@@ -22,13 +22,15 @@ def link_crawler(seed_url, link_regex=None, delay=5, max_depth=-1, max_urls=-1, 
     if user_agent:
         headers['User-agent'] = user_agent
 
+    count = 0
     while crawl_queue:
         url = crawl_queue.pop()
         depth = seen[url]
         # check url passes robots.txt restrictions
         if rp.can_fetch(user_agent, url):
             throttle.wait(url)
-            html = download(url, headers, proxy=proxy, num_retries=num_retries)
+            count = count + 1
+            html = download(url, headers, count, proxy=proxy, num_retries=num_retries)
             links = []
             if scrape_callback:
                 links.extend(scrape_callback(url, html) or [])
@@ -79,8 +81,8 @@ class Throttle:
 
 
 
-def download(url, headers, proxy, num_retries, data=None):
-    print 'Downloading:', url
+def download(url, headers, count, proxy, num_retries, data=None):
+    print('Downloading%4d: %s' % (count, url))
     request = urllib2.Request(url, data, headers)
     opener = urllib2.build_opener()
     if proxy:
@@ -97,7 +99,7 @@ def download(url, headers, proxy, num_retries, data=None):
             code = e.code
             if num_retries > 0 and 500 <= code < 600:
                 # retry 5XX HTTP errors
-                html = download(url, headers, proxy, num_retries-1, data)
+                html = download(url, headers, count, proxy, num_retries-1, data)
         else:
             code = None
     return html
@@ -135,5 +137,5 @@ def get_links(html):
 
 
 if __name__ == '__main__':
-    link_crawler('http://example.webscraping.com', '/(index|view)', delay=0, num_retries=1, user_agent='BadCrawler')
-    link_crawler('http://example.webscraping.com', '/(index|view)', delay=0, num_retries=1, max_depth=1, user_agent='GoodCrawler')
+    link_crawler('http://example.webscraping.com', '/places/default/(index|view)', delay=0, num_retries=1, user_agent='BadCrawler')
+    link_crawler('http://example.webscraping.com', '/places/default/(index|view)', delay=0, num_retries=1, max_depth=1, user_agent='GoodCrawler')

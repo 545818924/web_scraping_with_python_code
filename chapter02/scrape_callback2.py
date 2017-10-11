@@ -16,12 +16,15 @@ class ScrapeCallback:
 
     def __call__(self, url, html):
         if re.search('/view/', url):
-            tree = lxml.html.fromstring(html)
-            row = []
-            for field in self.fields:
-                row.append(tree.cssselect('table > tr#places_{}__row > td.w2p_fw'.format(field))[0].text_content())
-            self.writer.writerow(row)
+            if html:
+                tree = lxml.html.fromstring(html)
+                row = []
+                for field in self.fields:
+                    row.append(tree.cssselect('table > tr#places_{}__row > td.w2p_fw'.format(field))[0].text_content())
+                self.writer.writerow(row)
+            else:
+                print("no html, url:%s" % url)
 
 
 if __name__ == '__main__':
-    link_crawler('http://example.webscraping.com/', '/(index|view)', scrape_callback=ScrapeCallback())
+    link_crawler('http://example.webscraping.com/', '/places/default/(index|view)', scrape_callback=ScrapeCallback())
