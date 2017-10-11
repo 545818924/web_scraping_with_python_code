@@ -48,14 +48,19 @@ class DiskCache:
         """
         path = self.url_to_path(url)
         if os.path.exists(path):
-            with open(path, 'rb') as fp:
-                data = fp.read()
-                if self.compress:
-                    data = zlib.decompress(data)
-                result, timestamp = pickle.loads(data)
-                if self.has_expired(timestamp):
-                    raise KeyError(url + ' has expired')
-                return result
+            print("url:%s, open path:%s" % (url,path))
+            try:
+                with open(path, 'rb') as fp:
+                    data = fp.read()
+                    if self.compress:
+                        data = zlib.decompress(data)
+                    result, timestamp = pickle.loads(data)
+                    if self.has_expired(timestamp):
+                        raise KeyError(url + ' has expired')
+                    return result
+            except:
+                raise KeyError(url + " path can't open")
+
         else:
             # URL has not yet been cached
             raise KeyError(url + ' does not exist')
@@ -66,15 +71,18 @@ class DiskCache:
         """
         path = self.url_to_path(url)
         folder = os.path.dirname(path)
+        print("save to folder:%s" % folder)
         if not os.path.exists(folder):
             os.makedirs(folder)
 
         data = pickle.dumps((result, datetime.utcnow()))
         if self.compress:
             data = zlib.compress(data)
-        with open(path, 'wb') as fp:
-            fp.write(data)
-
+        try:
+            with open(path, 'wb') as fp:
+                fp.write(data)
+        except:
+            pass
 
     def __delitem__(self, url):
         """Remove the value at this key and any empty parent sub-directories
@@ -120,4 +128,4 @@ class DiskCache:
 
 
 if __name__ == '__main__':
-    link_crawler('http://example.webscraping.com/', '/(index|view)', cache=DiskCache())
+    link_crawler('http://example.webscraping.com/', '/places/default/(index|view)', cache=DiskCache())
